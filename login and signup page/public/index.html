@@ -1,0 +1,49 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>LoginPage</title>
+        <style>
+            nav{
+                display: flex;
+                background-color:rgb(169, 140, 179);
+                justify-content: space-between;
+            }
+            nav ul{
+                display: flex;
+                text-decoration: none;
+                gap: 30px;
+                justify-content: space-around;
+            }
+            form{
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+            }
+            h1{
+                font-size: large,bold;
+                font-style: oblique;
+                background-color: rgb(115, 183, 244);
+                color: blue;
+                align-items: center;
+                align-content: center;
+                justify-content: center;
+
+
+            }
+        </style>
+    </head>
+    <body>
+    <h1>Login page</h1>
+    <form action="/form/submit" method="post">
+        <label for="username">Name:</label>
+        <input id="username" name="name" type="text" required>
+        <label for="mail">Email:</label>
+        <input id="username" name="email" type="email" required>
+        <button type="submit">login</button>
+    </form>
+    </body>
+    </html>

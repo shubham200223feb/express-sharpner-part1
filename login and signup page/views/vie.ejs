@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student List</title>
+</head>
+<body>
+  <h1>Student Data from Database</h1>
+  <ul>
+    <% persons.forEach((person) => { %>
+      <li>
+        <strong><%= person.id %>. Name:</strong> <%= person.name %>,
+        <strong>Email:</strong> <%= person.email %>,
+        
+      </li>
+    <% }); %>
+  </ul>
+</body>
+</html>
