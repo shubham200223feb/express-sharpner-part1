@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Expenses</title>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+  <h2>Your Expenses</h2>
+
+  <% if (!isPremium) { %>
+    <button id="buyPremium">Buy Premium</button>
+  <% } else { %>
+    <h3>🌟 Premium Member 🌟</h3>
+    <form action="/feachdata" method="get">
+      <button id="amount">Leadbord</button>
+    </form>
+    
+  <% } %>
+
+  <form method="POST" action="/add">
+    <input name="item" placeholder="Item" required />
+    <input name="amount" placeholder="Amount" required />
+    <input name="category" placeholder="Category" required />
+    <button type="submit">Add</button>
+  </form>
+<a href="/login"><button>logout</button></a>
+<h2>All Users Expenses Summary</h2>
+<ul>
+  <% expenses.forEach(exp => { %>
+        <li><%= exp.item %> - ₹<%= exp.amount %> (<%= exp.category %>)</li>
+  <% }) %>
+</ul>
+
+  <h1>Leader Bord</h1>
+<ul>
+  <% if (groupedExpenses) { %>
+    <% groupedExpenses.forEach(exp => { %>
+      <li>
+        <strong><%= exp.name %></strong> (<%= exp.email %>) — 
+        Total Expenses: ₹<%= exp.totalamount %>
+      </li>
+    <% }) %>
+  <% } %>
+</ul>
+
+
+  <script>
+  document.getElementById("buyPremium")?.addEventListener("click", async () => {
+    try {
+      const response = await fetch("/create/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      });
+
+      const data = await response.json();
+      if (!data.order || !data.key_id) {
+        alert("Failed to get Razorpay order");
+        return;
+      }
+
+      const options = {
+        key: data.key_id,
+        order_id: data.order.id,
+        handler: async function (response) {
+          const res = await fetch("/update/order-status", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              order_id: data.order.id,
+              payment_id: response.razorpay_payment_id,
+            }),
+          });
+          const result = await res.json();
+          if (result.success) {
+            alert("🎉 You are now a Premium Member!");
+            location.reload();
+          }
+        }
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      alert("Something went wrong with Razorpay");
+      console.error(err);
+    }
+  });
+</script>
+
+</body>
+</html>
