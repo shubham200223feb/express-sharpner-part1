@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Expenses</title>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <style>
+    .but{
+      display: flex;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <h2>Your Expenses</h2>
+
+  <% if (!isPremium) { %>
+    <button id="buyPremium">Buy Premium</button>
+  <% } else { %>
+    <h3>🌟 Premium Member 🌟</h3>
+    <form action="/feachdata" method="get">
+      <button id="amount">Leadbord</button>
+    </form>
+    
+  <% } %>
+  <!-- <form method="get" action="/expencess" style="margin-bottom: 1rem;">
+  <label for="limit">Expenses per page: </label>
+  <input type="number" name="limit" id="limit"  value="<%= limit %>"  required>
+  <button type="submit">Apply</button>
+</form>
+
+  <script>
+  const limitInput = document.getElementById('limit');
+
+  // 🔁 Step 1: On page load, set input value from localStorage (if exists)
+  const savedLimit = localStorage.getItem('limit');
+  if (savedLimit) {
+    limitInput.value = savedLimit;
+  }
+
+  // 📝 Step 2: On input change, save to localStorage
+  limitInput.addEventListener('change', function () {
+    localStorage.setItem('limit', limitInput.value);
+  });
+</script> -->
+
+  <form method="POST" action="/add">
+    <input name="item" placeholder="Item" required />
+    <input name="amount" placeholder="Amount" required />
+    <input name="category" placeholder="Category" required />
+    <button type="submit">Add</button>
+  </form>
+<a href="/login"><button>logout</button></a>
+<h2>All Users Expenses Summary</h2>
+<ul>
+  <% expenses.forEach(exp => { %>
+   
+        <li><%= exp.item %> - ₹<%= exp.amount %> (<%= exp.category %>)
+      
+        <form action="/delete" method="post">
+          <input type="hidden" name="userid" value="<%=exp.UserId %>">
+          <input type="hidden" name="amount" value="<%=exp.amount %>">
+          <input type="hidden" name="expencesid" value="<%=exp.id %>">
+          <button type="submit">Delete</button>
+        </form></li>
+  <% }) %>
+</ul>
+
+  <!-- 🔄 Pagination Controls -->
+ <% if (totalPages > 1) { %>
+    <div class="but">
+      <% if (currentPage > 1) { %>
+        <a href="/expencess?page=<%= currentPage - 1 %>&limit=<%=limit%>"><button>Prev</button></a>
+      <% } %>
+
+      <% for (let i = 1; i <= totalPages; i++) { %>
+        <% if (i === currentPage) { %>
+          <strong><button><%= i %></button></strong>
+        <% } else { %>
+          <a href="/expencess?page=<%= i %>&limit=<%=limit%>"><button><%= i %></button></a>
+        <% } %>
+      <% } %>
+
+      <% if (currentPage < totalPages) { %>
+        <a href="/expencess?page=<%= currentPage + 1 %>&limit=<%=limit%>"><button>Next</button></a>
+      <% } %>
+    </div>
+  <% } %>
+<ul>
+  <% if (groupedExpenses.length >0) { %>
+    <h1>Leader Bord</h1>
+    <% groupedExpenses.forEach(exp => { %>
+    
+      <li>
+    
+        <strong><%= exp.name %></strong> (<%= exp.email %>) — 
+        Total Expenses: ₹<%= exp.totalamount %>
+
+      </li>
+    <% }) %>
+  <% } %>
+</ul>
+
+
+  <script>
+  document.getElementById("buyPremium")?.addEventListener("click", async () => {
+    try {
+      const response = await fetch("/create/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      });
+
+      const data = await response.json();
+      if (!data.order || !data.key_id) {
+        alert("Failed to get Razorpay order");
+        return;
+      }
+
+      const options = {
+        key: data.key_id,
+        order_id: data.order.id,
+        handler: async function (response) {
+          const res = await fetch("/update/order-status", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              order_id: data.order.id,
+              payment_id: response.razorpay_payment_id,
+            }),
+          });
+          const result = await res.json();
+          if (result.success) {
+            alert("🎉 You are now a Premium Member!");
+            location.reload();
+          }
+        }
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      alert("Something went wrong with Razorpay");
+      console.error(err);
+    }
+  });
+</script>
+
+</body>
+</html>
